@@ -7,7 +7,6 @@ tags = ['AI', 'Prompt Engineering']
 
 
 
-#  Prompt Engineering Guide（Elavis Saravia）
 
 https://www.promptingguide.ai/introduction/tips
 
