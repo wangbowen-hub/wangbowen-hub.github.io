@@ -1,4 +1,4 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://wangbowen-hub.github.io/'
 languageCode = 'zh-cn'
 title = 'Woody BLOG'
 theme = 'hugo-book'
