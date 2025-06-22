@@ -1,0 +1,31 @@
+{{ $posts := where .Site.RegularPages "Type" "posts" }}
+{{ $posts = $posts | first 5 }}
+{{ if $posts }}
+<div class="recent-posts">
+  {{ range $posts }}
+  <div class="post-item" style="margin-bottom: 1rem; padding: 1rem; border-left: 4px solid #007ACC; background-color: #f8f9fa;">
+    <h3 style="margin-top: 0;">
+      <a href="{{ .RelPermalink }}" style="text-decoration: none; color: #007ACC;">
+        {{ .Title }}
+      </a>
+    </h3>
+    <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">
+      <time>{{ .Date.Format "2006年01月02日" }}</time>
+      {{ if .Params.tags }}
+        {{ range first 3 .Params.tags }}
+          <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; margin-left: 5px;">#{{ . }}</span>
+        {{ end }}
+      {{ end }}
+    </p>
+    {{ if .Summary }}
+    <p style="margin-bottom: 0;">{{ .Summary | truncate 150 }}...</p>
+    {{ end }}
+  </div>
+  {{ end }}
+</div>
+<p style="text-align: center; margin-top: 1.5rem;">
+  <a href="/posts/" style="color: #007ACC; text-decoration: none; font-weight: bold;">查看所有文章 →</a>
+</p>
+{{ else }}
+<p>暂无文章。</p>
+{{ end }} 

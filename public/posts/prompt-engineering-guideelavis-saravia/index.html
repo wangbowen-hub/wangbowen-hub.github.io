@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  Prompt Engineering Guide（Elavis Saravia）
+  #
+
+https://www.promptingguide.ai/introduction/tips
+https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api#h_1951f30f08
+https://platform.openai.com/docs/guides/reasoning-best-practices#7-evaluation-and-benchmarking-for-other-model-responses
+
+  Prompt Elements
+  #
+
+A prompt contains any of the following elements:
+Identity - 赋予模型的身份以及需要模型完成的任务
+Context - external information or additional context that can steer the model to better responses
+Input Format -输入数据格式
+Output Format -输出数据格式
+Rules -操作规则
+Examples -示例
+Input Data - the input or question that we are interested to find a response for
+Output Indicator -指示模型开始输出（可选）
+示例：
+# Identity
+
+你是一个信息提取助手，你的任务是从OCR识别结果中提取每一个问题的答案。
+
+# Input Format
+
+OCR识别结果使用```符号包围，按图片中从左至右、从上至下排序。问题列表使用[]符号包围。
+
+# Output Format
+
+* 输出以JSON格式返回，key为问题内容，value为对应答案列表。
+* 若OCR识别结果中无法提取某个问题答案，请将对应value设为空列表。
+* 只输出json格式的结果，并做json格式校验后返回，不要包含其它多余文字。
+* Company names: &lt;comma_separated_list_of_company_names&gt;
+
+# Rules
+
+* 所有问题的答案必须完全依据表格中的内容进行作答。
+* 回答时应尽可能详细和完整，不得省略或自行补充未在表格中明确出现的信息。
+* 保持原文的格式、数字、正负号、单位、符号和标点符号完全一致。
+* 答案必须逐字摘抄自 OCR 文本。
+* 一个问题可能包含多个对应答案，将每个答案添加到问题对应value的列表中。
+* 若OCR识别结果中无法提取某个问题答案，请将对应value设为空列表。
+* 问题的答案为&#34;其它&#34;、&#34;不详&#34;、&#34;拒绝提供&#34;，也需要添加到问题对应value的列表中，不应该进行省略。
+* 不得缩写、改写或断章取义。
+
+# Examples
+
+&lt;user_query&gt;
+How do I declare a string variable for a first name?
+&lt;/user_query&gt;
+
+&lt;assistant_response&gt;
+var first_name = &#34;Anna&#34;;
+&lt;/assistant_response&gt;
+
+&lt;product_review id=&#34;example-1&#34;&gt;
+I absolutely love this headphones — sound quality is amazing!
+&lt;/product_review&gt;
+
+&lt;assistant_response id=&#34;example-1&#34;&gt;
+Positive
+&lt;/assistant_response&gt;
+
+&lt;product_review id=&#34;example-2&#34;&gt;
+Battery life is okay, but the ear pads feel cheap.
+&lt;/product_review&gt;
+
+&lt;assistant_response id=&#34;example-2&#34;&gt;
+Neutral
+&lt;/assistant_response&gt;
+
+&lt;product_review id=&#34;example-3&#34;&gt;
+Terrible customer service, I&#39;ll never buy from them again.
+&lt;/product_review&gt;
+
+&lt;assistant_response id=&#34;example-3&#34;&gt;
+Negative
+&lt;/assistant_response&gt;
+
+
+# Input Data
+
+如下是需要提取信息的OCR
+OCR识别结果```{ocr_result}```
+问题列表{question_list}
+提取结果：（Output Indicator）
+###、##、&quot;&quot;&quot;、&rsquo;&rsquo;&rsquo;、&quot;、&rsquo;、&lt;&gt;、```可以表示强调。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/prompt-engineering-guideelavis-saravia/">
+  <meta property="og:site_name" content="Woody BLOG">
+  <meta property="og:title" content="Prompt Engineering Guide（Elavis Saravia）">
+  <meta property="og:description" content="Prompt Engineering Guide（Elavis Saravia） # https://www.promptingguide.ai/introduction/tips
+https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api#h_1951f30f08
+https://platform.openai.com/docs/guides/reasoning-best-practices#7-evaluation-and-benchmarking-for-other-model-responses
+Prompt Elements # A prompt contains any of the following elements:
+Identity - 赋予模型的身份以及需要模型完成的任务
+Context - external information or additional context that can steer the model to better responses
+Input Format -输入数据格式
+Output Format -输出数据格式
+Rules -操作规则
+Examples -示例
+Input Data - the input or question that we are interested to find a response for
+Output Indicator -指示模型开始输出（可选）
+示例：
+# Identity 你是一个信息提取助手，你的任务是从OCR识别结果中提取每一个问题的答案。 # Input Format OCR识别结果使用```符号包围，按图片中从左至右、从上至下排序。问题列表使用[]符号包围。 # Output Format * 输出以JSON格式返回，key为问题内容，value为对应答案列表。 * 若OCR识别结果中无法提取某个问题答案，请将对应value设为空列表。 * 只输出json格式的结果，并做json格式校验后返回，不要包含其它多余文字。 * Company names: &lt;comma_separated_list_of_company_names&gt; # Rules * 所有问题的答案必须完全依据表格中的内容进行作答。 * 回答时应尽可能详细和完整，不得省略或自行补充未在表格中明确出现的信息。 * 保持原文的格式、数字、正负号、单位、符号和标点符号完全一致。 * 答案必须逐字摘抄自 OCR 文本。 * 一个问题可能包含多个对应答案，将每个答案添加到问题对应value的列表中。 * 若OCR识别结果中无法提取某个问题答案，请将对应value设为空列表。 * 问题的答案为&#34;其它&#34;、&#34;不详&#34;、&#34;拒绝提供&#34;，也需要添加到问题对应value的列表中，不应该进行省略。 * 不得缩写、改写或断章取义。 # Examples &lt;user_query&gt; How do I declare a string variable for a first name? &lt;/user_query&gt; &lt;assistant_response&gt; var first_name = &#34;Anna&#34;; &lt;/assistant_response&gt; &lt;product_review id=&#34;example-1&#34;&gt; I absolutely love this headphones — sound quality is amazing! &lt;/product_review&gt; &lt;assistant_response id=&#34;example-1&#34;&gt; Positive &lt;/assistant_response&gt; &lt;product_review id=&#34;example-2&#34;&gt; Battery life is okay, but the ear pads feel cheap. &lt;/product_review&gt; &lt;assistant_response id=&#34;example-2&#34;&gt; Neutral &lt;/assistant_response&gt; &lt;product_review id=&#34;example-3&#34;&gt; Terrible customer service, I&#39;ll never buy from them again. &lt;/product_review&gt; &lt;assistant_response id=&#34;example-3&#34;&gt; Negative &lt;/assistant_response&gt; # Input Data 如下是需要提取信息的OCR OCR识别结果```{ocr_result}``` 问题列表{question_list} 提取结果：（Output Indicator） ###、##、&#34;&#34;&#34;、’’’、&#34;、’、&lt;&gt;、```可以表示强调。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-18T18:30:03+08:00">
+    <meta property="article:modified_time" content="2025-06-18T18:30:03+08:00">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="Prompt Engineering">
+<title>Prompt Engineering Guide（Elavis Saravia） | Woody BLOG</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/prompt-engineering-guideelavis-saravia/">
+<link rel="stylesheet" href="/book.min.d5e59cb0aa8d22a5813c62cd5e25d3d172489a369c61dc3f622ee96ae1ebb457.css" integrity="sha256-1eWcsKqNIqWBPGLNXiXT0XJImjacYdw/Yi7pauHrtFc=" crossorigin="anonymous">
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.815f935fa19fd4d2259ba1d0fa23dae29f402931cd3ef73449734f61fabfb23a.js" integrity="sha256-gV&#43;TX6Gf1NIlm6HQ&#43;iPa4p9AKTHNPvc0SXNPYfq/sjo=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  <link rel="stylesheet" href="/css/custom.css"> 
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>Woody BLOG</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/posts"  target="_blank" rel="noopener">
+        博客文章
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+
+
+<div class="book-menu-tags">
+  <h3>📚 按标签分类</h3>
+  
+    
+    
+    <details class="book-section-flat">
+      <summary class="flex">
+        <span class="flex-auto">🏷️ AI (1)</span>
+      </summary>
+      <ul>
+        
+        <li>
+          <a href="/posts/prompt-engineering-guideelavis-saravia/" class="active">
+            📄 Prompt Engineering Guide（Elavis Saravia）
+          </a>
+        </li>
+        
+      </ul>
+    </details>
+    
+  
+    
+    
+    <details class="book-section-flat">
+      <summary class="flex">
+        <span class="flex-auto">🏷️ Prompt Engineering (1)</span>
+      </summary>
+      <ul>
+        
+        <li>
+          <a href="/posts/prompt-engineering-guideelavis-saravia/" class="active">
+            📄 Prompt Engineering Guide（Elavis Saravia）
+          </a>
+        </li>
+        
+      </ul>
+    </details>
+    
+  
+</div>
+ 
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/posts/prompt-engineering-guideelavis-saravia/" class="active">Prompt Engineering Guide（Elavis Saravia）</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+ 
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Prompt Engineering Guide（Elavis Saravia）</h3>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#prompt-elements">Prompt Elements</a></li>
+    <li><a href="#general-tips">General Tips</a>
+      <ul>
+        <li><a href="#gpt-model-vs-reasoning-model">GPT Model vs Reasoning Model</a></li>
+      </ul>
+    </li>
+    <li><a href="#learning">Learning</a></li>
+    <li><a href="#to-do">TO DO</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+<article class="markdown book-post">
+  <h1>
+    Prompt Engineering Guide（Elavis Saravia）
+  </h1>
+  
+  <div class="flex align-center text-small book-post-date">
+    <img src="/svg/calendar.svg" class="book-icon " alt="" />
+    <span>June 18, 2025</span>
+  </div>
+
+
+
+  
+  <div class="text-small">
+    
+      <a href="/tags/ai/">AI</a>, 
+      <a href="/tags/prompt-engineering/">Prompt Engineering</a>
+  </div>
+  
+
+
+  <div class="book-post-content"><h1 id="prompt-engineering-guideelavis-saravia">
+  Prompt Engineering Guide（Elavis Saravia）
+  <a class="anchor" href="#prompt-engineering-guideelavis-saravia">#</a>
+</h1>
+<p><a href="https://www.promptingguide.ai/introduction/tips">https://www.promptingguide.ai/introduction/tips</a></p>
+<p><a href="https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api#h_1951f30f08">https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api#h_1951f30f08</a></p>
+<p><a href="https://platform.openai.com/docs/guides/reasoning-best-practices#7-evaluation-and-benchmarking-for-other-model-responses">https://platform.openai.com/docs/guides/reasoning-best-practices#7-evaluation-and-benchmarking-for-other-model-responses</a></p>
+<h2 id="prompt-elements">
+  Prompt Elements
+  <a class="anchor" href="#prompt-elements">#</a>
+</h2>
+<p>A prompt contains any of the following elements:</p>
+<p><strong>Identity</strong> - 赋予模型的身份以及需要模型完成的任务</p>
+<p><strong>Context</strong> - external information or additional context that can steer the model to better responses</p>
+<p><strong>Input Format</strong> -输入数据格式</p>
+<p><strong>Output Format</strong> -输出数据格式</p>
+<p><strong>Rules</strong> -操作规则</p>
+<p><strong>Examples</strong> -示例</p>
+<p><strong>Input Data</strong> - the input or question that we are interested to find a response for</p>
+<p><strong>Output Indicator</strong> -指示模型开始输出（可选）</p>
+<p>示例：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Identity</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000">你是一个信息提取助手</span><span style="color:#a40000">，</span><span style="color:#000">你的任务是从OCR识别结果中提取每一个问题的答案</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Input Format</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000">OCR识别结果使用</span><span style="color:#a40000">```</span><span style="color:#000">符号包围</span><span style="color:#a40000">，</span><span style="color:#000">按图片中从左至右</span><span style="color:#a40000">、</span><span style="color:#000">从上至下排序</span><span style="color:#a40000">。</span><span style="color:#000">问题列表使用</span><span style="color:#000;font-weight:bold">[]</span><span style="color:#000">符号包围</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Output Format</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">输出以JSON格式返回</span><span style="color:#a40000">，</span><span style="color:#000">key为问题内容</span><span style="color:#a40000">，</span><span style="color:#000">value为对应答案列表</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">若OCR识别结果中无法提取某个问题答案</span><span style="color:#a40000">，</span><span style="color:#000">请将对应value设为空列表</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">只输出json格式的结果</span><span style="color:#a40000">，</span><span style="color:#000">并做json格式校验后返回</span><span style="color:#a40000">，</span><span style="color:#000">不要包含其它多余文字</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">Company</span> <span style="color:#000">names</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">comma_separated_list_of_company_names</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Rules</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">所有问题的答案必须完全依据表格中的内容进行作答</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">回答时应尽可能详细和完整</span><span style="color:#a40000">，</span><span style="color:#000">不得省略或自行补充未在表格中明确出现的信息</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">保持原文的格式</span><span style="color:#a40000">、</span><span style="color:#000">数字</span><span style="color:#a40000">、</span><span style="color:#000">正负号</span><span style="color:#a40000">、</span><span style="color:#000">单位</span><span style="color:#a40000">、</span><span style="color:#000">符号和标点符号完全一致</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">答案必须逐字摘抄自</span> <span style="color:#000">OCR</span> <span style="color:#000">文本</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">一个问题可能包含多个对应答案</span><span style="color:#a40000">，</span><span style="color:#000">将每个答案添加到问题对应value的列表中</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">若OCR识别结果中无法提取某个问题答案</span><span style="color:#a40000">，</span><span style="color:#000">请将对应value设为空列表</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">问题的答案为</span><span style="color:#4e9a06">&#34;其它&#34;</span><span style="color:#a40000">、</span><span style="color:#4e9a06">&#34;不详&#34;</span><span style="color:#a40000">、</span><span style="color:#4e9a06">&#34;拒绝提供&#34;</span><span style="color:#a40000">，</span><span style="color:#000">也需要添加到问题对应value的列表中</span><span style="color:#a40000">，</span><span style="color:#000">不应该进行省略</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">不得缩写</span><span style="color:#a40000">、</span><span style="color:#000">改写或断章取义</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Examples</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">user_query</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">How</span> <span style="color:#000">do</span> <span style="color:#000">I</span> <span style="color:#000">declare</span> <span style="color:#000">a</span> <span style="color:#000">string</span> <span style="color:#000">variable</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">a</span> <span style="color:#000">first</span> <span style="color:#000">name</span><span style="color:#a40000">?</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">user_query</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">assistant_response</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">var</span> <span style="color:#000">first_name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;Anna&#34;</span><span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">assistant_response</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">product_review</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-1&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">I</span> <span style="color:#000">absolutely</span> <span style="color:#000">love</span> <span style="color:#000">this</span> <span style="color:#000">headphones</span> <span style="color:#a40000">—</span> <span style="color:#000">sound</span> <span style="color:#000">quality</span> <span style="color:#204a87;font-weight:bold">is</span> <span style="color:#000">amazing</span><span style="color:#a40000">!</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">product_review</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">assistant_response</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-1&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Positive</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">assistant_response</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">product_review</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-2&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Battery</span> <span style="color:#000">life</span> <span style="color:#204a87;font-weight:bold">is</span> <span style="color:#000">okay</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">but</span> <span style="color:#000">the</span> <span style="color:#000">ear</span> <span style="color:#000">pads</span> <span style="color:#000">feel</span> <span style="color:#000">cheap</span><span style="color:#ce5c00;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">product_review</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">assistant_response</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-2&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Neutral</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">assistant_response</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">product_review</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-3&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Terrible</span> <span style="color:#000">customer</span> <span style="color:#000">service</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">I</span><span style="color:#4e9a06">&#39;ll never buy from them again.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">product_review</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">assistant_response</span> <span style="color:#204a87">id</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;example-3&#34;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Negative</span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">&lt;/</span><span style="color:#000">assistant_response</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Input Data</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000">如下是需要提取信息的OCR</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">OCR识别结果</span><span style="color:#a40000">```</span><span style="color:#000;font-weight:bold">{</span><span style="color:#000">ocr_result</span><span style="color:#000;font-weight:bold">}</span><span style="color:#a40000">```</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">问题列表</span><span style="color:#000;font-weight:bold">{</span><span style="color:#000">question_list</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">提取结果</span><span style="color:#a40000">：（</span><span style="color:#000">Output</span> <span style="color:#000">Indicator</span><span style="color:#a40000">）</span>
+</span></span></code></pre></div><p>###、##、&quot;&quot;&quot;、&rsquo;&rsquo;&rsquo;、&quot;、&rsquo;、&lt;&gt;、```可以表示强调。</p>
+<h2 id="general-tips">
+  General Tips
+  <a class="anchor" href="#general-tips">#</a>
+</h2>
+<ol>
+<li>
+<p>使用最新的模型</p>
+</li>
+<li>
+<p>As you get started with designing prompts, you should keep in mind that it is really an iterative process that requires a lot of experimentation to get optimal results. (需要多次实验迭代达到更佳结果)（OpenAI playground、Cohere）</p>
+</li>
+<li>
+<p>specificity、preciseness、conciseness</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>### Specificity ###
+</span></span><span style="display:flex;"><span>Less effective ❌:
+</span></span><span style="display:flex;"><span>  Write a poem about OpenAI. 
+</span></span><span style="display:flex;"><span>Better ✅:
+</span></span><span style="display:flex;"><span>  Write a short inspiring poem about OpenAI, focusing on the recent DALL-E product launch (DALL-E is a text to image ML model) in the style of a {famous poet}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>### Preciseness ###
+</span></span><span style="display:flex;"><span>Less effective ❌:
+</span></span><span style="display:flex;"><span>  Explain the concept prompt engineering. Keep the explanation short, only a few sentences, and don&#39;t be too descriptive.
+</span></span><span style="display:flex;"><span>Better ✅:
+</span></span><span style="display:flex;"><span>	Use 2-3 sentences to explain the concept of prompt engineering to a high school student.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>### Conciseness ###
+</span></span><span style="display:flex;"><span>Less effective ❌:
+</span></span><span style="display:flex;"><span>  The description for this product should be fairly short, a few sentences only, and not too much more.
+</span></span><span style="display:flex;"><span>Better ✅:
+</span></span><span style="display:flex;"><span>  Use a 3 to 5 sentence paragraph to describe this product.
+</span></span></code></pre></div></li>
+<li>
+<p>Place instructions at the beginning of the prompt, use some clear separator like &ldquo;###&rdquo; to separate the instruction and context. (instruction放在prompt的开头，并用例如###的分隔符进行分割指令和上下文)</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>Less effective ❌:
+</span></span><span style="display:flex;"><span>  Summarize the text below as a bullet point list of the most important points.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	{text input here}
+</span></span><span style="display:flex;"><span> Better ✅:
+</span></span><span style="display:flex;"><span>  Summarize the text below as a bullet point list of the most important points.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Text: <span style="color:#4e9a06">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>  {text input here}
+</span></span><span style="display:flex;"><span>  <span style="color:#4e9a06">&#34;&#34;&#34;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>Avoid saying what not to do but say what to do instead.(告诉模型应该做什么而不是不应该做什么)</p>
+</li>
+<li>
+<p>Try zero shot first, then few shot if needed, neither of them worked, then fine-tune(首先尝试zero shot，如果需要复杂输出，可以通过few-shot给出示例告诉模型应该怎样输出(适用于reasoning model和gpt model)，也可以通过示例告诉模型应该怎么思考和解决问题(适用于gpt model)，如果实在都不行就需要微调了 )（注意示例应该与prompt中要求保持一致，不然会影响模型输出效果）</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">### Few-shot ###</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Extract</span> <span style="color:#000">keywords</span> <span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">the</span> <span style="color:#000">corresponding</span> <span style="color:#000">texts</span> <span style="color:#000">below</span><span style="color:#ce5c00;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Text</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">Stripe</span> <span style="color:#000">provides</span> <span style="color:#000">APIs</span> <span style="color:#000">that</span> <span style="color:#000">web</span> <span style="color:#000">developers</span> <span style="color:#000">can</span> <span style="color:#000">use</span> <span style="color:#000">to</span> <span style="color:#000">integrate</span> <span style="color:#000">payment</span> <span style="color:#000">processing</span> <span style="color:#000">into</span> <span style="color:#000">their</span> <span style="color:#000">websites</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000">mobile</span> <span style="color:#000">applications</span><span style="color:#ce5c00;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Keywords</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">Stripe</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">payment</span> <span style="color:#000">processing</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">APIs</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">web</span> <span style="color:#000">developers</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">websites</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">mobile</span> <span style="color:#000">applications</span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">##</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Text</span> <span style="color:#0000cf;font-weight:bold">2</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">OpenAI</span> <span style="color:#000">has</span> <span style="color:#000">trained</span> <span style="color:#000">cutting</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#000">edge</span> <span style="color:#000">language</span> <span style="color:#000">models</span> <span style="color:#000">that</span> <span style="color:#000">are</span> <span style="color:#000">very</span> <span style="color:#000">good</span> <span style="color:#000">at</span> <span style="color:#000">understanding</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000">generating</span> <span style="color:#000">text</span><span style="color:#ce5c00;font-weight:bold">.</span> <span style="color:#000">Our</span> <span style="color:#000">API</span> <span style="color:#000">provides</span> <span style="color:#000">access</span> <span style="color:#000">to</span> <span style="color:#000">these</span> <span style="color:#000">models</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000">can</span> <span style="color:#000">be</span> <span style="color:#000">used</span> <span style="color:#000">to</span> <span style="color:#000">solve</span> <span style="color:#000">virtually</span> <span style="color:#204a87">any</span> <span style="color:#000">task</span> <span style="color:#000">that</span> <span style="color:#000">involves</span> <span style="color:#000">processing</span> <span style="color:#000">language</span><span style="color:#ce5c00;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Keywords</span> <span style="color:#0000cf;font-weight:bold">2</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">OpenAI</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">language</span> <span style="color:#000">models</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">text</span> <span style="color:#000">processing</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">API</span><span style="color:#ce5c00;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">##</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Text</span> <span style="color:#0000cf;font-weight:bold">3</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#000">text</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">Keywords</span> <span style="color:#0000cf;font-weight:bold">3</span><span style="color:#000;font-weight:bold">:</span>
+</span></span></code></pre></div></li>
+<li>
+<p>使用分隔符（如markdown, XML tags, and section titles ）来clarify prompt的不同部分，一方面可以是prompt层次结构更加清晰，另一方面也有助于模型更好的理解prompt</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">答案列表中元素为JSON格式</span><span style="color:#a40000">，</span><span style="color:#000">包含text和id两个个字段</span><span style="color:#a40000">，</span><span style="color:#000">text为答案内容</span><span style="color:#a40000">，</span><span style="color:#000">id为列表类型</span><span style="color:#a40000">，</span><span style="color:#000">列表中元素为答案所在BOX的id值</span><span style="color:#a40000">。（</span><span style="color:#000">worse</span><span style="color:#000;font-weight:bold">,</span><span style="color:#a40000">👎）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">答案列表中元素为</span> <span style="color:#000">JSON</span> <span style="color:#000">格式</span><span style="color:#a40000">，</span><span style="color:#000">包含</span> <span style="color:#4e9a06">&#34;text&#34;</span> <span style="color:#000">和</span> <span style="color:#4e9a06">&#34;id&#34;</span> <span style="color:#000">两个字段</span><span style="color:#a40000">：</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#4e9a06">&#34;text&#34;</span> <span style="color:#000">字段值表示答案内容</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#4e9a06">&#34;id&#34;</span> <span style="color:#000">字段值为列表类型</span><span style="color:#a40000">，</span><span style="color:#000">列表中元素表示答案所在</span> <span style="color:#000">BOX</span> <span style="color:#000">的</span> <span style="color:#204a87">id</span> <span style="color:#000">值</span><span style="color:#a40000">。（</span><span style="color:#000">better</span><span style="color:#a40000">，👍）</span>
+</span></span></code></pre></div></li>
+<li>
+<p>为了让模型更清晰地辨识语言边界，中文与英文之间建议空一格。如果提示词以中文为主，夹杂少量英文，使用中文标点符号；如果提示词以英文为主，夹杂少量中文，使用英文标点符号。在同一个提示词中，标点符号使用要统一，不要在同一句中混用两种标点体系。</p>
+</li>
+<li>
+<p>prompt中的风格需要保持统一。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">### 如下列列表项要么末尾都加句号，要不都不加。###</span>
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">1.</span> <span style="color:#000">请提取文章中的关键词</span><span style="color:#a40000">。</span>  
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">2.</span> <span style="color:#000">用三句话概述文章要点</span><span style="color:#a40000">。</span>  
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">3.</span> <span style="color:#000">翻译成英文</span><span style="color:#a40000">。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">1.</span> <span style="color:#000">请提取文章中的关键词</span>  
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">2.</span> <span style="color:#000">用三句话概述文章要点</span> 
+</span></span><span style="display:flex;"><span><span style="color:#0000cf;font-weight:bold">3.</span> <span style="color:#000">翻译成英文</span>
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="gpt-model-vs-reasoning-model">
+  GPT Model vs Reasoning Model
+  <a class="anchor" href="#gpt-model-vs-reasoning-model">#</a>
+</h3>
+<ul>
+<li>A reasoning model is like a senior co-worker. You can give them a goal to achieve and trust them to work out the details.</li>
+<li>A GPT model is like a junior coworker. They&rsquo;ll perform best with explicit instructions to create a specific output.</li>
+</ul>
+<p><strong>如何选择</strong> ：</p>
+<p>GPT Model：更快，cost更低，适合简单预先定义的工作，如总结、翻译等</p>
+<p>Reasoning Model：</p>
+<pre><code>1. 适合用户提示不明确、用户输入模棱两可、背景信息有限的情形，能够理解用户意图，消除instruction gaps
+2. 适合“大海捞针”，从大量无结构文档中找出所需的最相关信息
+3. 查找多份/大量数据/文档中的相似处和细微差别
+4. 适合planning，在复杂agent系统中，reasoning model做planner，gpt model做doer
+5. 视觉推理，reasoning model在质量不高的图像中相较于gpt model会有更好的表现
+6. 评估模型输出（Evaluation and benchmarking for other model responses）
+</code></pre>
+<p><strong>如何prompt reasoning model</strong>：</p>
+<p>general tips中的方法均适用于reasoning model，但注意对于reasoning model不要使用CoT方法，如&quot;think step by step&quot;和&quot;explain your reasoning&quot;，因为reasoning model是internal thinking，使用cot方法会影响模型能力。</p>
+<h2 id="learning">
+  Learning
+  <a class="anchor" href="#learning">#</a>
+</h2>
+<ol>
+<li>模型的理解能力很强，标点符号、空格、分隔符这些东西不会改变它对你需求的理解，对模型输出结果影响不大</li>
+</ol>
+<h2 id="to-do">
+  TO DO
+  <a class="anchor" href="#to-do">#</a>
+</h2>
+<p>reasoning items是什么（https://platform.openai.com/docs/guides/reasoning-best-practices#7-evaluation-and-benchmarking-for-other-model-responses）</p>
+<p>使用openai playground</p>
+<p><a href="https://platform.openai.com/docs/guides/reasoning?api-mode=chat">https://platform.openai.com/docs/guides/reasoning?api-mode=chat</a></p>
+<p><a href="https://platform.openai.com/docs/guides/fine-tuning">https://platform.openai.com/docs/guides/fine-tuning</a></p>
+<p>openai cookbook很值得看</p>
+<p>caffeinate</p>
+<p><a href="https://www.nature.com/articles/d41586-023-00288-7">https://www.nature.com/articles/d41586-023-00288-7</a></p>
+<p><a href="https://arxiv.org/abs/2202.12837">https://arxiv.org/abs/2202.12837</a></p>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#prompt-elements">Prompt Elements</a></li>
+    <li><a href="#general-tips">General Tips</a>
+      <ul>
+        <li><a href="#gpt-model-vs-reasoning-model">GPT Model vs Reasoning Model</a></li>
+      </ul>
+    </li>
+    <li><a href="#learning">Learning</a></li>
+    <li><a href="#to-do">TO DO</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

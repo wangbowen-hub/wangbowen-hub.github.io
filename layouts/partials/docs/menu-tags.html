@@ -1,0 +1,25 @@
+{{/* 按标签分类的侧边书签菜单 */}}
+{{ if .Site.Taxonomies.tags }}
+<div class="book-menu-tags">
+  <h3>📚 按标签分类</h3>
+  {{ range $tagName, $tagTaxonomy := .Site.Taxonomies.tags }}
+    {{ $tag := $.Site.GetPage (printf "/tags/%s" $tagName) }}
+    {{ if $tag }}
+    <details class="book-section-flat">
+      <summary class="flex">
+        <span class="flex-auto">🏷️ {{ $tag.Title }} ({{ len $tagTaxonomy.Pages }})</span>
+      </summary>
+      <ul>
+        {{ range $tagTaxonomy.Pages.ByTitle }}
+        <li>
+          <a href="{{ .RelPermalink }}" class="{{ if eq $.Page . }}active{{ end }}">
+            📄 {{ .Title }}
+          </a>
+        </li>
+        {{ end }}
+      </ul>
+    </details>
+    {{ end }}
+  {{ end }}
+</div>
+{{ end }} 

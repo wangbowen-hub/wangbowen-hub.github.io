@@ -1,0 +1,101 @@
+/* 代码块背景色增强 */
+pre {
+    background-color: #e0e0e0 !important;
+    border: 1px solid #c0c0c0 !important;
+    border-radius: 4px !important;
+    padding: 16px !important;
+    margin: 16px 0 !important;
+    overflow-x: auto !important;
+}
+
+/* 行内代码背景色 */
+code {
+    background-color: #f1f3f4 !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+    font-size: 0.9em !important;
+}
+
+/* 确保代码块内的code不重复应用样式 */
+pre code {
+    background-color: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* 标签分类菜单样式 */
+.book-menu-tags {
+  margin: 1rem 0;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--gray-200);
+}
+
+.book-menu-tags h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-700);
+}
+
+.book-menu-tags details {
+  margin: 0.25rem 0;
+}
+
+.book-menu-tags summary {
+  cursor: pointer;
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-link);
+  transition: color 0.15s ease;
+}
+
+.book-menu-tags summary:hover {
+  color: var(--color-visited-link);
+}
+
+.book-menu-tags ul {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.book-menu-tags li {
+  margin: 0.25rem 0;
+}
+
+.book-menu-tags li a {
+  display: block;
+  padding: 0.25rem 0;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.book-menu-tags li a:hover {
+  color: var(--color-link);
+  padding-left: 0.5rem;
+}
+
+.book-menu-tags li a.active {
+  color: var(--color-link);
+  font-weight: 600;
+}
+
+/* 暗色主题适配 */
+.book-dark .book-menu-tags {
+  border-top-color: var(--gray-600);
+}
+
+.book-dark .book-menu-tags h3 {
+  color: var(--gray-100);
+}
+
+.book-dark .book-menu-tags li a {
+  color: var(--gray-300);
+}
+
+.book-dark .book-menu-tags li a:hover {
+  color: var(--color-link);
+} 

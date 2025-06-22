@@ -1,0 +1,31 @@
+baseURL = 'https://example.org/'
+languageCode = 'zh-cn'
+title = 'Woody BLOG'
+theme = 'hugo-book'
+
+# 启用分类法
+[taxonomies]
+  tag = "tags"
+
+[params]
+# Book theme specific params
+BookToC = true
+BookMenuBundle = true
+BookSection = 'posts'
+
+[markup]
+[markup.goldmark]
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.highlight]
+style = "tango"
+noClasses = true
+lineNos = false
+guessSyntax = false
+
+[menu]
+[[menu.before]]
+name = "博客文章"
+url = "/posts"
+weight = 10
