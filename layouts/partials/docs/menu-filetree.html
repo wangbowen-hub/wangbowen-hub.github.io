@@ -1,0 +1,15 @@
+{{- $section := .Site.GetPage .Site.Params.BookSection -}}
+{{- with $section -}}
+  {{- if .Pages -}}
+    <ul>
+      {{- range .Pages -}}
+        <li>
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          {{- if .Pages -}}
+            {{- partial "docs/menu-filetree" . -}}
+          {{- end -}}
+        </li>
+      {{- end -}}
+    </ul>
+  {{- end -}}
+{{- end -}} 

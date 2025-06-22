@@ -1,0 +1,13 @@
+{{- if hugo.IsMultilingual -}}
+  <div class="book-languages">
+    <label for="book-languages-toggle">{{ i18n "Languages" | default "Languages" }}</label>
+    <input type="checkbox" id="book-languages-toggle" class="toggle" />
+    <ul>
+      {{- range .Site.Languages -}}
+        <li>
+          <a href="{{ $.Site.BaseURL }}/{{ .Lang }}/">{{ .LanguageName }}</a>
+        </li>
+      {{- end -}}
+    </ul>
+  </div>
+{{- end -}} 

@@ -1,0 +1,10 @@
+<p>
+  <a class="flex align-center" href="https://github.com/alex-shpak/hugo-book" target="_blank" rel="noopener">
+    <img src="{{ "svg/edit.svg" | relURL }}" class="book-icon" alt="Edit" />
+    {{ i18n "Edit this page" | default "Edit this page" }}
+  </a>
+</p>
+<p>
+  <img src="{{ "svg/calendar.svg" | relURL }}" class="book-icon" alt="Calendar" />
+  {{ i18n "Last modified" | default "Last modified" }} {{ .Lastmod.Format "January 2, 2006" }}
+</p> 
