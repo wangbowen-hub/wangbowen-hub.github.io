@@ -23,11 +23,13 @@ temperature参数用于改变概率分布的形状，低温度（<1）让概率�
 
 假设我们有3个候选token，它们的logits分别是：
 
-- Token A: logit = 3.0
+```python
+Token A: logit = 3.0
 
-- Token B: logit = 2.0
+Token B: logit = 2.0
 
-- Token C: logit = 1.0
+Token C: logit = 1.0
+```
 
 当 temperature = 1.0 时：
 
