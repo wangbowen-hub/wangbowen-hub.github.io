@@ -265,4 +265,12 @@ Step 1:           Step 2:                    Step 3:
   两者的目标相互矛盾
   ```
 
+  stop_sequence
+
+  Max_length
+
+  Stop_squence实现多字段json抽取？
+
+  temperture和top_p不建议一起使用？
+
   
