@@ -1,5 +1,5 @@
 ---
-title: "Llm Benchmark"
+title: "LLM Benchmark"
 date: 2025-06-26T18:49:48+08:00
 # bookComments: false
 # bookSearchExclude: false

@@ -1,5 +1,5 @@
 ---
-title: "Llm Structured Ouputs"
+title: "LLM Structured Ouputs"
 date: 2025-07-11T18:54:20+08:00
 # bookComments: false
 # bookSearchExclude: false
@@ -81,6 +81,17 @@ response = client.chat.completions.create/parse(
 ## 注意是content，不是跟sdk objects一样的parsed，这里打印parsed会返回None，即使content里是遵循schema的json
 print(response.choices[0].message.content)
 ```
+
+#### strict
+
+* 将 `strict` 设为 `false` ，模型生成过程仍受 schema 派生的语法约束，但生成完成后不会强制比对，允许模型返回模式中未指定的额外字段，类似于 JSON 模式。
+*  `strict` 设为 `true` ,对模型生成强制约束，不符合schema会立刻拒绝（`refusal` 字段）或抛 400
+* strict默认为false，一旦模型“卡壳”生成不出闭合 JSON，严格模式下更容易触发长时间的token 死循环，浪费配额——这是官方没有默认开启的原因
+* strict必须配合Structured Outputs一起使用，JSON mode不受strict影响
+* Structured Outputs的SDK Objects方式，strict默认为true
+* strict mode有两个限制
+  * `additionalProperties` must be set to `false` for each object in the `parameters`.
+  * All fields in `properties` must be marked as `required`(You can denote optional fields by adding `null` as a `type` option ).
 
 ## JSON mode
 

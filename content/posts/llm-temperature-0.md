@@ -1,5 +1,5 @@
 ---
-title: "Llm Temperature 0"
+title: "LLM Temperature 0"
 date: 2025-07-11T10:14:06+08:00
 # bookComments: false
 # bookSearchExclude: false

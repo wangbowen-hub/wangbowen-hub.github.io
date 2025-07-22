@@ -1,5 +1,5 @@
 ---
-title: "Llm Sample Parameters"
+title: "LLM Sample Parameters"
 date: 2025-07-09T18:10:38+08:00
 # bookComments: false
 # bookSearchExclude: false
