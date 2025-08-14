@@ -11,7 +11,56 @@ Structured Outputs和JSON mode是模型结构化输出的两种方式，Structur
 
 ## Structured Outputs
 
-Structured Outputs方式实现结构化输出有objects和手动模式两种方法，objects通过pydantic定义basemodel，手动模式需要自己手动构建json_schema
+* Structured Outputs方式实现结构化输出有objects和手动模式两种方法，objects通过pydantic定义basemodel，手动模式需要自己手动构建json_schema
+
+* 经过自身实验，json_schema中影响structured output的因素有变量名、title和description字段，一般情况下description字段的影响大于变量名和title字段
+
+  ```python
+  class FormData(BaseModel):
+      name: List[str] = Field(description="项目")
+      result: List[str] = Field(description="结果")
+      range_res: List[str] = Field(description="参考范围")
+      
+  
+  # 继承BaseModel类pydantic自动生成的json_schema
+  {
+    "properties": {
+      "name": {
+        "description": "项目",
+        "items": {
+          "type": "string"
+        },
+        "title": "Name",
+        "type": "array"
+      },
+      "result": {
+        "description": "结果",
+        "items": {
+          "type": "string"
+        },
+        "title": "Result",
+        "type": "array"
+      },
+      "range_res": {
+        "description": "参考范围",
+        "items": {
+          "type": "string"
+        },
+        "title": "Range Res",
+        "type": "array"
+      }
+    },
+    "required": [
+      "name",
+      "result",
+      "range_res"
+    ],
+    "title": "FormData",
+    "type": "object"
+  }
+  ```
+
+  
 
 ### SDK Objects
 

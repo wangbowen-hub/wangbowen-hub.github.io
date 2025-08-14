@@ -239,3 +239,48 @@ class HyDERetriever:
 * **Document Augmentation through Question Generation (Doc‑QG)**：先用 LLM 替每段文本生成「用户可能会问的问题（可选连同答案）」，把这些 *明文问题* 直接附加回语料，再走常规检索。
 
 * **HyPE (Hypothetical Prompt Embedding)**：同样用 LLM 生成假设性问题，但**只把这些问题转成向量后保存**，丢弃文字本身；检索时拿查询向量和「假设问题向量」比对。
+
+
+
+## Advanced Retrieval
+
+### Fusion Retrieval
+
+将基于向量的相似性搜索与基于关键词的 BM25 检索相结合，旨在利用两种技术的优势，提升文档检索的整体质量和相关性。
+
+![Fusion Retrieval](https://github.com/NirDiamant/RAG_Techniques/blob/main/images/fusion_retrieval.svg?raw=1)
+
+### Reranking
+
+通过对初始检索结果进行重新评估和排序，确保将最相关的信息优先用于后续处理或呈现。
+
+Reranking有一下两种方法：
+
+* LLM方法
+
+![rerank llm](https://github.com/NirDiamant/RAG_Techniques/blob/main/images/rerank_llm.svg?raw=1)
+
+* 交叉编码器Cross Encoder方法
+
+![rerank cross encoder](https://github.com/NirDiamant/RAG_Techniques/blob/main/images/rerank_cross_encoder.svg?raw=1)
+
+
+
+###  Hierarchical Indices
+
+采用两级编码机制：文档级摘要（document-level summaries）和细节文本块（detailed chunks）。该方法旨在通过摘要先识别相关文档段落，再深入挖掘这些段落中的具体细节，从而提高信息检索的效率和相关性。
+
+![hierarchical_indices](https://github.com/NirDiamant/RAG_Techniques/blob/main/images/hierarchical_indices.svg?raw=1)
+
+###  Dartboard Retrieval
+
+确保检索到的信息既相关又不冗余。在大型数据库中，文档可能重复相似内容，导致前 k 项检索结果存在冗余。结合相关性与多样性可获得更丰富的文档集合，缓解内容过度相似造成的"信息茧房"效应。
+
+### Multi-modal RAG with Captioning
+
+![Reliable-RAG](https://github.com/NirDiamant/RAG_Techniques/blob/main/images/multi_model_rag_with_captioning.svg?raw=1)
+
+### Multi-faceted Filtering（无）
+
+### Ensemble Retrieval（无）
+
