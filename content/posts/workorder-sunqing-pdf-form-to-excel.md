@@ -49,6 +49,8 @@ uuid.uuid4().hex 生成随机UUID,移除所有连字符，返回32位的纯十�
 
 `__all__`中有带下划线对象，import *和显式引入都会导出下划线对象
 
+https://wangbowen-hub.github.io/posts/cursor1/
+
 ## 11.python关键字参数收集器，位置参数收集器
 
 *是位置参数收集器（收集到元组里），**是关键字参数收集器（收集到dict里）
