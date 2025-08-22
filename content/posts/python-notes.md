@@ -31,7 +31,6 @@ Python作为一个动态语言，并不会做类型检查，所谓的“类型�
 
 ```python
 x = None
-y = None
 print(x is None)   # True
 print(x == None)   # True
 
