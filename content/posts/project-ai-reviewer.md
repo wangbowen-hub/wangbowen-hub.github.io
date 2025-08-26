@@ -274,9 +274,19 @@ on_chain_end
 
 * woodylogger中多进程写入日志文件存在竞态。Python 标准 logging 在 handler 级别是加锁的，所以多线程并发输出不会有竞态问题。解决方法: 将woodylogger中的TimedRotatingFileHandler替换成concurrent_log_handler.ConcurrentTimedRotatingFileHandler
 
-* ReviewerAgent存在竞态，langgraph图fanout 时会并发触发同一个 REVIEW 节点的同一实例，`ReviewerAgent.__call__` 内把链路存到实例属性 `self.chain`，多协程并发时会互相覆盖，导致 A 调用可能使用到 B 的链。解决方法: 将`self.chain`改为`chain`
+* ReviewerAgent存在竞态，langgraph图fanout会复用同一个agent实例并发执行 `agent.__call__`，触发同一个 REVIEW 节点的同一实例，`ReviewerAgent.__call__` 内把chain存到实例属性 `self.chain`，多协程并发时会互相覆盖，导致 A 调用可能使用到 B 的链。解决方法: 将`self.chain`改为`chain`
+
+![](/posts/image.png)
+![](/posts/image2.png)
+
 
 详见：[项目竞态问题](/posts/cursor2.md)
+
+
+mocker
+pyproject.toml
+ai-extract-langgraph pytest全过
+image_downlaoder路径
 
 
 
