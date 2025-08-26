@@ -117,6 +117,11 @@ any([])                 # False
 * 测试函数以test_开头
 * 异步测试函数上方需要添加 @pytest.mark.asyncio注解
 * 测试参数使用 @pytest.mark.parametrize注解
+* @pytest.fixture为测试准备数据
+* pytest参数:
+* -q 安静输出
+* -s 关闭输出捕获，测试函数中的print能够输出打印
+
 
 ```python
 
@@ -141,6 +146,24 @@ async def test_async_compress_and_encode_images_from_urls(image_urls):
 
 
 ```
+
+```python
+
+# tests/test_demo.py
+import pytest
+
+@pytest.fixture
+def user():
+    # 准备数据
+    return {"id": 1, "name": "Ada"}
+
+def test_user_has_name(user):
+    assert user["name"] == "Ada"
+
+
+```
+
+详见: [pytest初学者使用指南](/posts/pytest入门教程.html)
 
 ## 14.
 LangGraph实现按需并行扇出，需要多个节点就同时跑多个:
